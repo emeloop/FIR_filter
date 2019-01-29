@@ -16,14 +16,12 @@ using std::cin;
 
 float lowpass_filter(float _x, float _fc)
 {
-    cout << "lowpass_filter" << endl;
     if(_x < _fc)return 1.0;
     else return 0.0;
 }
 
 float tri_polynomial(float _x, std::vector<float> _list_a)
 {
-    cout << "tri_potnomial" << endl;
     int a=0,k=0,sum=0;
     for(int i=0; i<_list_a.size();i++)
     {
@@ -34,7 +32,6 @@ float tri_polynomial(float _x, std::vector<float> _list_a)
 }
 float d_tri_polynomial(float _x, std::vector<float> _list_a)
 {
-    cout << "d_tri_polynomial" << endl;
     int a=0,k=0,sum=0;
     for(int i=0; i<_list_a.size();i++)
     {
@@ -46,7 +43,6 @@ float d_tri_polynomial(float _x, std::vector<float> _list_a)
 }
 float dd_tri_polynomial(float _x, std::vector<float> _list_a)
 {
-    cout << "dd_tri_polynomial" << endl;
     int a=0,k=0,sum=0;
     for(int i=0; i<_list_a.size();i++)
     {
@@ -57,19 +53,16 @@ float dd_tri_polynomial(float _x, std::vector<float> _list_a)
 }
 float func(float x, std::vector<float> _list_a)
 {
-    cout << "func" << endl;
     return d_tri_polynomial(x, _list_a);
 }
 float dfunc(float x, std::vector<float> _list_a)
 {
-    cout << "dfunc" << endl;
     return dd_tri_polynomial(x, _list_a);
 }
-std::vector<double> linspace(double a, double b, int n) 
+std::vector<float> linspace(float a, float b, int n) 
 {
-    cout << "linspace" << endl;
-    std::vector<double> array;
-    double step = (b-a) / (n-1);
+    std::vector<float> array;
+    float step = (b-a) / (n-1);
 
     while(a <= b) {
         array.push_back(a);
@@ -79,7 +72,6 @@ std::vector<double> linspace(double a, double b, int n)
 }
 float newton(float _x0, std::vector<float> _list_a)
 {
-    cout << "newton" << endl;
     float x,x_next;
     x = _x0;
     for(int i = 0; i < 100; i++)
@@ -97,7 +89,6 @@ float newton(float _x0, std::vector<float> _list_a)
 
 std::vector<float> search_extreme_points(std::vector<float> _list_a, int _div)
 {
-    cout << "serach_extreme_points" << endl;
     float func,dfunc,x;
     //    func = d_tri_polynomial(x, _list_a);
     //    dfunc = dd_tri_polynomial(x, _list_a);
@@ -122,62 +113,86 @@ std::vector<float> search_extreme_points(std::vector<float> _list_a, int _div)
 }
 std::vector<float> initialize_extreme_points(int _n, float _fc, float _fs)
 {
-    cout << "initialize_extreme_points" << endl;
     int num_point = _n + 2;
     int num_passed_point = (int)(num_point * _fc/M_PI);
     int num_stopped_point = num_point-num_passed_point;
-    std::vector<float> num;
-    std::vector<float> linscape1;
-    std::vector<float> linscape2;
-    cout << "num_passed_point:" << num_passed_point << endl;
+    cout << "num_passed_point:" << num_passed_point <<endl;
     cout << "num_stopped_point:" << num_stopped_point << endl;
-    std::copy(linspace(0.0, _fc-0.5*_fs, num_passed_point).begin(), linspace(0.0, _fc-0.5*_fs, num_passed_point).end(), std::back_inserter(linscape1));
-    std::copy(linspace(_fs+0.5*_fs, M_PI, num_stopped_point).begin(), linspace(_fs+0.5*_fs, M_PI, num_stopped_point).end(), std::back_inserter(linscape2));
-    cout << "test" << endl;
+    std::vector<float> num;
+    std::vector<float> linscape1 = linspace(0.0, _fc-0.5*_fs, num_passed_point);
+    std::vector<float> linscape2 = linspace(_fs+0.5*_fs, M_PI, num_stopped_point);
+    cout << "linscape1:" << linscape1.size() << endl;
+    cout << "linscape2:" << linscape2.size() << endl;
     for(int i=0; i<linscape1.size();i++)
     {
         num.push_back(linscape1[i]);
     }
-    cout << "test" << endl;
     for(int i=0; i<linscape2.size();i++)
     {
         num.push_back(linscape2[i]);
     }
-    cout << "test" << endl;
     return num;
 }
 std::tuple<std::vector<float>, float> update_tri_polynomial_coefficients(std::vector<float> _list_x, std::vector<float> _list_a, float _fc)
 {
-    cout << "update_tri_polynomial_coefficients" << endl;
+    cout << "test1" << endl;
     int x,k=0;
     int x_size = _list_x.size();
-    Eigen::MatrixXd matrix_A,matrix_J;
-    for(int i=0; i<x_size; i++)
+    cout << "x_size:" << _list_x.size() << endl;
+    Eigen::MatrixXd matrix_A(x_size,x_size+1);
+    /*
+    for(x=0; x<x_size-1; x++)
     {
         matrix_A << cos(x*k);
     }
+    cout << "test" << endl;
     for(int j=0; j<x_size; j++)
     {
         matrix_J << pow(-1,j);
     }
+    cout << "test" << endl;
     matrix_A = matrix_A + matrix_J;
-
-    Eigen::VectorXd vector_b;
+    cout << "test" << endl;
+    */
+    int j=0;
+    int count = 1;
+    for(x=0;x<x_size;x++)
+    {
+        for(k=0;k<x_size-1;k++)
+        {
+            //cout << "list_x["<< j << "]:" << _list_x[j] << endl;
+            //cout << matrix_A << endl;
+            matrix_A(x,k) = cos(_list_x[j]*k);
+            j++;
+            cout << count++ << endl;
+        }
+        cout << "test" << endl;
+        matrix_A(x,x_size) = pow(-1.0,(double)x);
+        j=0;
+    }
+    cout << "test1" <<endl;
+    Eigen::VectorXd vector_b(x_size);
     for(int i=0; i<x_size; i++)
     {
-        vector_b << lowpass_filter(x, _fc);
+        cout << "test2" << endl;
+        vector_b(i,0) = lowpass_filter(_list_x[i], _fc);
     }
-    Eigen::VectorXd vector_x = matrix_A.fullPivLu().solve(vector_b);
+    cout << "test" << endl;
+    cout << "matrix_A:" << matrix_A << endl;
+    Eigen::VectorXd vector_x(x_size);
+    vector_x = matrix_A.fullPivLu().solve(vector_b);
+    cout << "vector_x:" << vector_x << endl;
+    cout << "test" << endl;
     for(int i=0; i<vector_x.size();i++)
     {
         _list_a[i] = vector_x(i);
     }
+    cout << "test" << endl;
     float d = vector_x(vector_x.size()-1);
-
+    cout << "test" << endl;
 }
 std::vector<float> update_maximum_error_points(std::vector<float> _list_a, float _fc, float _fs)
 {
-    cout << "update_maximum_error_points" << endl;
     int n = _list_a.size()-1;
     std::vector<float> extreme_points;
     std::copy(search_extreme_points(_list_a,(n+2)*10).begin(), search_extreme_points(_list_a,(n+2)*10).end(), std::back_inserter(extreme_points));
@@ -207,12 +222,10 @@ std::vector<float> update_maximum_error_points(std::vector<float> _list_a, float
 }
 float efunc(float _x, std::vector<float> _list_a, float _fc)
 {
-    cout << "efunc" << endl;
     return tri_polynomial(_x, _list_a) - lowpass_filter(_x, _fc);
 }
 float check_convergence(std::vector<float> _list_a, std::vector<float> _list_x, float _fc)
 {
-    cout << "check_convergence" << endl;
     int k=0,x;
     std::vector<float> efunc_array;
     for(int i = 0; i<_list_x.size(); i++)
@@ -238,9 +251,9 @@ float check_convergence(std::vector<float> _list_a, std::vector<float> _list_x, 
 
 std::tuple<std::vector<float>, float, std::vector<float>,int> remez(int _order, float _fc, float _fs, int max_iter=100)
 {
-    cout << "remez" << endl;
     int n = (_order - 1) /2;
     std::vector<float> list_x = initialize_extreme_points(n, _fc, _fs);
+    cout << "list_x size:" << list_x.size() << endl;
     std::vector<float> list_a,list_h;
     float d;
     int i;
@@ -294,5 +307,9 @@ int main(void)
     int count;
     std::tie(list_h, d, list_x, count) = remez(filter_order, fc, fs);
 
+    for(int i=0;i<list_h.size();i++)
+    {
+        cout << list_h[i] << endl;
+    }
     
 }
